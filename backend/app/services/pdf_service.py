@@ -35,10 +35,29 @@ def _logo_data_uri(logo_path: str | None) -> str:
     encoded = base64.b64encode(file.read_bytes()).decode("ascii")
     return f"data:{mime};base64,{encoded}"
 
+import re
+
+
+def format_amount(value) -> str:
+    """Format a number with Indian digit grouping and 2 decimals.
+
+    e.g. 90000 -> "90,000.00", 1234567.5 -> "12,34,567.50".
+    """
+    s = f"{abs(float(value or 0)):.2f}"
+    intpart, dec = s.split(".")
+    if len(intpart) > 3:
+        head, tail = intpart[:-3], intpart[-3:]
+        head = re.sub(r"(\d)(?=(\d\d)+$)", r"\1,", head)
+        intpart = f"{head},{tail}"
+    sign = "-" if float(value or 0) < 0 else ""
+    return f"{sign}{intpart}.{dec}"
+
+
 _env = Environment(
     loader=FileSystemLoader(str(TEMPLATE_DIR)),
     autoescape=select_autoescape(["html", "xml"]),
 )
+_env.filters["amount"] = format_amount
 
 
 def _default_columns() -> list[dict]:
@@ -60,7 +79,7 @@ def _cell_value(item: Quotation, column: dict, index: int, symbol: str) -> str:
     if source == "field":
         value = getattr(item, key, "")
         if key in {"unit_price", "line_total"}:
-            return f"{symbol}{float(value or 0):,.2f}"
+            return f"{symbol}{format_amount(value)}"
         if key == "quantity":
             qty = float(value or 0)
             return f"{qty:g} {item.unit or ''}".strip()

@@ -5,100 +5,127 @@
 <style>
   @page {
     size: A4;
-    margin: 18mm 15mm 20mm 15mm;
-    @bottom-center {
+    margin: 14mm 14mm 18mm 14mm;
+    @bottom-left {
       content: "{{ styling.footer_note or '' }}";
-      font-size: 8pt;
-      color: #9aa1ac;
+      font-size: 7.5pt; color: #9aa1ac;
     }
     @bottom-right {
       content: "Page " counter(page) " of " counter(pages);
-      font-size: 8pt;
-      color: #9aa1ac;
+      font-size: 7.5pt; color: #9aa1ac;
     }
   }
-  :root { --brand: {{ styling.primary_color or '#2563eb' }}; }
+  :root { --brand: {{ styling.primary_color or '#1f4e79' }}; }
   * { box-sizing: border-box; }
   body {
     font-family: {{ styling.font_family or 'Helvetica, Arial, sans-serif' }};
-    color: #1f2733; font-size: 10pt; margin: 0; line-height: 1.45;
+    color: #22303f; font-size: 9.5pt; margin: 0; line-height: 1.4;
   }
-  .header { display: flex; justify-content: space-between; align-items: flex-start;
-            border-bottom: 3px solid var(--brand); padding-bottom: 14px; margin-bottom: 22px; }
-  .company-logo { max-height: 64px; max-width: 240px; margin-bottom: 8px; display: block; }
-  .company-name { font-size: 20pt; font-weight: 700; color: var(--brand); margin: 0 0 4px; }
-  .company-meta { color: #5b6472; font-size: 9pt; white-space: pre-line; }
-  .doc-title { text-align: right; }
-  .doc-title h1 { font-size: 22pt; letter-spacing: 2px; margin: 0 0 6px; color: #1f2733; text-transform: uppercase; }
-  .doc-meta { font-size: 9pt; color: #5b6472; }
-  .doc-meta b { color: #1f2733; }
-  .parties { display: flex; gap: 30px; margin-bottom: 20px; }
-  .party { flex: 1; }
-  .party .label { text-transform: uppercase; font-size: 8pt; letter-spacing: 1px;
-                  color: #9aa1ac; margin-bottom: 5px; }
-  .party .name { font-weight: 700; font-size: 11pt; }
-  .party .detail { color: #5b6472; font-size: 9pt; white-space: pre-line; }
-  table.items { width: 100%; border-collapse: collapse; margin-bottom: 18px; }
+  table { border-collapse: collapse; width: 100%; }
+
+  /* ---------- Header ---------- */
+  .head td { vertical-align: top; }
+  .head-right { text-align: right; width: 42%; }
+  .company-logo { max-height: 56px; max-width: 220px; margin-bottom: 6px; }
+  .co-name { font-size: 15pt; font-weight: 700; color: var(--brand); margin-bottom: 3px; }
+  .co-meta { color: #5b6472; font-size: 8.5pt; white-space: pre-line; line-height: 1.5; }
+  .doc-title { font-size: 20pt; font-weight: 700; color: var(--brand); letter-spacing: .5px; margin-bottom: 8px; }
+  .meta { width: auto; margin-left: auto; }
+  .meta td { padding: 2px 0 2px 12px; font-size: 8.8pt; text-align: right; white-space: nowrap; }
+  .meta .mlabel { color: #7a828e; }
+  .meta .mval { font-weight: 700; color: #22303f; }
+  .status { display: inline-block; margin-top: 6px; padding: 2px 9px; border: 1px solid var(--brand);
+            border-radius: 3px; font-size: 7.5pt; text-transform: uppercase; letter-spacing: .5px; color: var(--brand); }
+  .rule { height: 2px; background: var(--brand); margin: 12px 0 16px; }
+
+  /* ---------- Parties ---------- */
+  .parties td { vertical-align: top; width: 50%; padding-right: 24px; }
+  .ptitle { font-size: 7.5pt; text-transform: uppercase; letter-spacing: 1px; color: #9aa1ac; margin-bottom: 4px; }
+  .pname { font-weight: 700; font-size: 10.5pt; margin-bottom: 2px; }
+  .pdetail { color: #5b6472; font-size: 8.8pt; white-space: pre-line; line-height: 1.5; }
+  .spacer { height: 18px; }
+
+  /* ---------- Items ---------- */
+  table.items { border: 1px solid #dfe3e8; }
   table.items thead th {
-    background: var(--brand); color: #fff; font-size: 8.5pt; text-transform: uppercase;
-    letter-spacing: .5px; padding: 9px 8px; text-align: left; font-weight: 600;
+    background: var(--brand); color: #fff; font-size: 8pt; font-weight: 600;
+    text-transform: uppercase; letter-spacing: .3px; padding: 8px 8px; text-align: left;
+    border-right: 1px solid rgba(255,255,255,.15);
   }
-  table.items tbody td { padding: 8px; border-bottom: 1px solid #e7eaee; vertical-align: top; }
-  table.items tbody tr:nth-child(even) td { background: #f7f9fc; }
-  .totals { width: 44%; margin-left: auto; }
-  .totals table { width: 100%; border-collapse: collapse; }
-  .totals td { padding: 6px 8px; font-size: 10pt; }
+  table.items thead th:last-child { border-right: 0; }
+  table.items tbody td { padding: 7px 8px; border-bottom: 1px solid #edf0f3; font-size: 9pt; vertical-align: top; }
+  table.items tbody tr:nth-child(even) td { background: #f6f8fb; }
+  table.items tbody tr:last-child td { border-bottom: 0; }
+
+  /* ---------- Totals ---------- */
+  .totals-wrap td { vertical-align: top; }
+  .totals { width: 46%; margin-left: auto; border: 1px solid #dfe3e8; }
+  .totals td { padding: 6px 12px; font-size: 9.2pt; border-bottom: 1px solid #edf0f3; }
   .totals td.label { color: #5b6472; text-align: right; }
-  .totals td.value { text-align: right; font-weight: 600; }
-  .totals tr.grand td { border-top: 2px solid var(--brand); font-size: 12pt;
-                        color: var(--brand); font-weight: 700; padding-top: 10px; }
-  .section { margin-top: 20px; }
-  .section h3 { font-size: 9pt; text-transform: uppercase; letter-spacing: 1px;
-                color: #9aa1ac; margin: 0 0 6px; }
-  .section p { margin: 0; color: #5b6472; font-size: 9pt; white-space: pre-line; }
-  .badge { display: inline-block; padding: 2px 10px; border-radius: 999px; font-size: 8pt;
-           text-transform: uppercase; letter-spacing: .5px; background: #eef2ff; color: var(--brand); }
+  .totals td.value { text-align: right; font-weight: 600; white-space: nowrap; }
+  .totals tr.grand td { background: var(--brand); color: #fff; font-size: 11pt; font-weight: 700; border-bottom: 0; }
+  .totals tr.grand td.label { color: #fff; }
+
+  /* ---------- Sections & signature ---------- */
+  .section { margin-top: 16px; }
+  .section h3 { font-size: 8pt; text-transform: uppercase; letter-spacing: 1px; color: #22303f;
+                margin: 0 0 5px; padding-bottom: 3px; border-bottom: 1px solid #e2e6ec; }
+  .section p { margin: 0; color: #5b6472; font-size: 8.8pt; white-space: pre-line; line-height: 1.55; }
+  .sign { margin-top: 30px; }
+  .sign td { vertical-align: bottom; }
+  .sign-cell { text-align: center; width: 40%; }
+  .sign-for { font-size: 8.8pt; color: #5b6472; margin-bottom: 34px; }
+  .sign-line { border-top: 1px solid #98a2b0; padding-top: 4px; font-size: 8.5pt; color: #22303f; }
 </style>
 </head>
 <body>
-  <div class="header">
-    <div class="company">
-      {% if logo %}<img class="company-logo" src="{{ logo }}" alt="">{% endif %}
-      <p class="company-name">{{ company.name or 'Your Company' }}</p>
-      <div class="company-meta">{{ company.address or '' }}{% if company.phone %}
+
+  <!-- Header: company (left) + document meta (right) -->
+  <table class="head">
+    <tr>
+      <td class="head-left">
+        {% if logo %}<img class="company-logo" src="{{ logo }}" alt="">{% endif %}
+        <div class="co-name">{{ company.name or 'Your Company' }}</div>
+        <div class="co-meta">{{ company.address or '' }}{% if company.phone %}
 Tel: {{ company.phone }}{% endif %}{% if company.email %}
 {{ company.email }}{% endif %}{% if company.website %}
 {{ company.website }}{% endif %}{% if company.tax_number %}
-Tax No: {{ company.tax_number }}{% endif %}</div>
-    </div>
-    <div class="doc-title">
-      <h1>{{ styling.doc_title or 'Quotation' }}</h1>
-      <div class="doc-meta">
-        <div><b>No:</b> {{ q.number }}</div>
-        {% if q.quote_date %}<div><b>Date:</b> {{ q.quote_date }}</div>{% endif %}
-        {% if q.valid_until %}<div><b>Valid until:</b> {{ q.valid_until }}</div>{% endif %}
-        <div style="margin-top:6px"><span class="badge">{{ q.status }}</span></div>
-      </div>
-    </div>
-  </div>
+GST No: {{ company.tax_number }}{% endif %}</div>
+      </td>
+      <td class="head-right">
+        <div class="doc-title">{{ styling.doc_title or 'Quotation' }}</div>
+        <table class="meta">
+          <tr><td class="mlabel">Quotation No.</td><td class="mval">{{ q.number }}</td></tr>
+          {% if q.quote_date %}<tr><td class="mlabel">Date</td><td class="mval">{{ q.quote_date }}</td></tr>{% endif %}
+          {% if q.valid_until %}<tr><td class="mlabel">Valid Until</td><td class="mval">{{ q.valid_until }}</td></tr>{% endif %}
+        </table>
+        {% if q.status %}<div class="status">{{ q.status }}</div>{% endif %}
+      </td>
+    </tr>
+  </table>
 
-  <div class="parties">
-    <div class="party">
-      <div class="label">Prepared for</div>
-      <div class="name">{{ q.customer_name or '—' }}</div>
-      {% if q.customer_company %}<div class="detail">{{ q.customer_company }}</div>{% endif %}
-      <div class="detail">{{ q.customer_address or '' }}{% if q.customer_phone %}
+  <div class="rule"></div>
+
+  <!-- Parties -->
+  <table class="parties">
+    <tr>
+      <td>
+        <div class="ptitle">Bill To</div>
+        <div class="pname">{{ q.customer_name or '—' }}</div>
+        {% if q.customer_company %}<div class="pdetail">{{ q.customer_company }}</div>{% endif %}
+        <div class="pdetail">{{ q.customer_address or '' }}{% if q.customer_phone %}
 {{ q.customer_phone }}{% endif %}{% if q.customer_email %}
 {{ q.customer_email }}{% endif %}</div>
-    </div>
-    {% if q.title %}
-    <div class="party">
-      <div class="label">Subject</div>
-      <div class="name">{{ q.title }}</div>
-    </div>
-    {% endif %}
-  </div>
+      </td>
+      <td>
+        {% if q.title %}<div class="ptitle">Subject</div><div class="pname" style="font-size:10pt">{{ q.title }}</div>{% endif %}
+      </td>
+    </tr>
+  </table>
 
+  <div class="spacer"></div>
+
+  <!-- Line items -->
   <table class="items">
     <thead>
       <tr>
@@ -118,18 +145,36 @@ Tax No: {{ company.tax_number }}{% endif %}</div>
     </tbody>
   </table>
 
-  <div class="totals">
-    <table>
-      <tr><td class="label">Subtotal</td><td class="value">{{ symbol }}{{ '%.2f' | format(q.subtotal) }}</td></tr>
-      {% if q.discount %}<tr><td class="label">Discount ({{ '%g' | format(q.discount) }}%)</td>
-        <td class="value">-{{ symbol }}{{ '%.2f' | format(q.subtotal * q.discount / 100) }}</td></tr>{% endif %}
-      {% if q.tax_rate %}<tr><td class="label">Tax ({{ '%g' | format(q.tax_rate) }}%)</td>
-        <td class="value">{{ symbol }}{{ '%.2f' | format((q.subtotal - q.subtotal * q.discount / 100) * q.tax_rate / 100) }}</td></tr>{% endif %}
-      <tr class="grand"><td class="label">Total</td><td class="value">{{ symbol }}{{ '%.2f' | format(q.total) }}</td></tr>
-    </table>
-  </div>
+  <!-- Totals -->
+  <table class="totals-wrap">
+    <tr>
+      <td></td>
+      <td style="width:46%">
+        <table class="totals">
+          <tr><td class="label">Subtotal</td><td class="value">{{ symbol }}{{ q.subtotal | amount }}</td></tr>
+          {% if q.discount %}<tr><td class="label">Discount ({{ '%g' | format(q.discount) }}%)</td>
+            <td class="value">&minus;{{ symbol }}{{ (q.subtotal * q.discount / 100) | amount }}</td></tr>{% endif %}
+          {% if q.tax_rate %}<tr><td class="label">Tax ({{ '%g' | format(q.tax_rate) }}%)</td>
+            <td class="value">{{ symbol }}{{ ((q.subtotal - q.subtotal * q.discount / 100) * q.tax_rate / 100) | amount }}</td></tr>{% endif %}
+          <tr class="grand"><td class="label">Total</td><td class="value">{{ symbol }}{{ q.total | amount }}</td></tr>
+        </table>
+      </td>
+    </tr>
+  </table>
 
   {% if q.notes %}<div class="section"><h3>Notes</h3><p>{{ q.notes }}</p></div>{% endif %}
   {% if q.terms %}<div class="section"><h3>Terms &amp; Conditions</h3><p>{{ q.terms }}</p></div>{% endif %}
+
+  <!-- Signature -->
+  <table class="sign">
+    <tr>
+      <td></td>
+      <td class="sign-cell">
+        <div class="sign-for">For {{ company.name or 'Your Company' }}</div>
+        <div class="sign-line">Authorised Signatory</div>
+      </td>
+    </tr>
+  </table>
+
 </body>
 </html>

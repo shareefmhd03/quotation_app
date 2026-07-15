@@ -59,7 +59,7 @@ const Templates = (() => {
       <p class="muted" style="margin:-4px 0 10px">Company details are managed separately and picked per quotation (Companies tab).</p>
       <div class="field-grid">
         <label>Primary color<input id="tf-color" type="color" value="${esc(s.primary_color || '#2563eb')}"></label>
-        <label>Currency symbol<input id="tf-currency" value="${esc(s.currency_symbol || '$')}"></label>
+        <label>Currency symbol<input id="tf-currency" value="${esc(s.currency_symbol || '₹')}"></label>
         <label class="span-2">Footer note<input id="tf-footer" value="${esc(s.footer_note || '')}"></label>
       </div>
       <label class="block" style="flex-direction:row;align-items:center;gap:8px;margin-top:12px">
@@ -95,7 +95,7 @@ const Templates = (() => {
       styling: {
         doc_title: root.querySelector('#tf-doctitle').value.trim() || 'Quotation',
         primary_color: root.querySelector('#tf-color').value,
-        currency_symbol: root.querySelector('#tf-currency').value.trim() || '$',
+        currency_symbol: root.querySelector('#tf-currency').value.trim() || '₹',
         footer_note: root.querySelector('#tf-footer').value.trim(),
       },
     };

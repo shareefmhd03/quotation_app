@@ -3,9 +3,10 @@ const UI = (() => {
   const $ = (sel, root = document) => root.querySelector(sel);
   const $$ = (sel, root = document) => [...root.querySelectorAll(sel)];
 
-  let currency = '$';
+  let currency = '₹';
   const setCurrency = (sym) => { currency = sym; };
-  const money = (n) => `${currency}${Number(n || 0).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+  // en-IN gives Indian digit grouping (e.g. ₹1,00,000.00).
+  const money = (n) => `${currency}${Number(n || 0).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
 
   // Escape untrusted text for safe innerHTML interpolation.
   const esc = (s) => String(s ?? '').replace(/[&<>"']/g, (c) =>

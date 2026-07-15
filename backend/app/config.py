@@ -23,8 +23,8 @@ class Settings(BaseSettings):
     # SQLite for now; set QUOTE_DATABASE_URL to a postgres URL to scale later.
     database_url: str = f"sqlite:///{DATA_DIR / 'quotation.db'}"
     # Currency + tax defaults surfaced to the frontend/PDF.
-    currency: str = "USD"
-    currency_symbol: str = "$"
+    currency: str = "INR"
+    currency_symbol: str = "₹"
 
 
 settings = Settings()

@@ -44,7 +44,7 @@ DEFAULT_TEMPLATE = {
     "styling": {
         "primary_color": "#2563eb",
         "doc_title": "Quotation",
-        "currency_symbol": "$",
+        "currency_symbol": "₹",
         "footer_note": "Thank you for your business.",
     },
 }
@@ -67,7 +67,7 @@ FURNITURE_TEMPLATE = {
     "styling": {
         "primary_color": "#0f766e",
         "doc_title": "Quotation",
-        "currency_symbol": "$",
+        "currency_symbol": "₹",
         "footer_note": "Prices valid for 30 days.",
     },
 }

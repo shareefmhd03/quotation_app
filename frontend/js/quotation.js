@@ -106,9 +106,10 @@ const Quotation = (() => {
           recompute();
         };
       } else if (c.source === 'field') {
-        // name / description / unit
+        // name / description / unit (unit gets the searchable unit list)
         const val = item[c.key] ?? '';
-        td.innerHTML = `<input type="text" style="text-align:${align}" value="${esc(val)}">`;
+        const listAttr = c.key === 'unit' ? 'list="unit-list" autocomplete="off"' : '';
+        td.innerHTML = `<input type="text" ${listAttr} style="text-align:${align}" value="${esc(val)}">`;
         td.querySelector('input').oninput = (e) => { item[c.key] = e.target.value; };
       } else {
         // attribute source — snapshot copy, never written back to product

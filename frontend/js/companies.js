@@ -42,7 +42,7 @@ const Companies = (() => {
         <label>Email<input id="cf-email" value="${esc(c.email || '')}"></label>
         <label>Phone<input id="cf-phone" value="${esc(c.phone || '')}"></label>
         <label>Website<input id="cf-web" value="${esc(c.website || '')}"></label>
-        <label>Tax / VAT number<input id="cf-tax" value="${esc(c.tax_number || '')}"></label>
+        <label>GST number<input id="cf-tax" value="${esc(c.tax_number || '')}" placeholder="e.g. 29ABCDE1234F1Z5"></label>
         <label class="span-2">Address<textarea id="cf-addr" rows="2">${esc(c.address || '')}</textarea></label>
       </div>
       <div class="subhead">Default terms &amp; conditions</div>
