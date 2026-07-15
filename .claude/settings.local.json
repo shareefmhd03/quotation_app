@@ -1,0 +1,40 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(apt list *)",
+      "Bash(python3 -m venv testvenv)",
+      "Bash(ldconfig -p)",
+      "Bash(python3 -m venv .venv)",
+      "Bash(.venv/bin/python -m pip install --upgrade pip -q)",
+      "Bash(.venv/bin/pip install *)",
+      "Bash(.venv/bin/python -c \"import weasyprint, fastapi, sqlalchemy; print\\('imports ok'\\)\")",
+      "Bash(chmod +x run.sh)",
+      "Bash(.venv/bin/python backend/seed.py)",
+      "Bash(../.venv/bin/uvicorn app.main:app --host 127.0.0.1 --port 8010)",
+      "Bash(echo \"started pid $!\")",
+      "Bash(curl -s http://127.0.0.1:8010/api/products)",
+      "Bash(curl -s -X DELETE http://127.0.0.1:8010/api/quotations/1 -o /dev/null -w 'del quotation: %{http_code}\\\\n')",
+      "Bash(curl -s -X DELETE http://127.0.0.1:8010/api/products/4 -o /dev/null -w 'del bookshelf: %{http_code}\\\\n')",
+      "Bash(python3 -c \"import sys,json;print\\(len\\(json.load\\(sys.stdin\\)\\)\\)\")",
+      "Bash(pkill -f \"uvicorn app.main\")",
+      "Bash(curl -s -o /dev/null -w \"index.html: %{http_code}\\\\n\" http://127.0.0.1:8010/)",
+      "Bash(curl -s -o /dev/null -w \"styles.css: %{http_code}\\\\n\" http://127.0.0.1:8010/css/styles.css)",
+      "Bash(curl -s -o /dev/null -w \"app.js: %{http_code}\\\\n\" http://127.0.0.1:8010/js/app.js)",
+      "Bash(curl -s -o /dev/null -w \"api products: %{http_code}\\\\n\" http://127.0.0.1:8010/api/products)",
+      "Bash(curl -s http://127.0.0.1:8010/api/quotations/1/pdf -o /tmp/claude-1000/-home-shareef-Documents-quotation-app/0289ec9b-3dae-4880-a001-950664cdaba6/scratchpad/dim.pdf)",
+      "Bash(curl -s http://127.0.0.1:8010/api/quotations/1/preview)",
+      "Bash(grep -A1 'class=\"name\"' __TRACKED_VAR__/fix.html)",
+      "Bash(curl -s -X DELETE http://127.0.0.1:8010/api/products/4 -o /dev/null -w 'del stray product: %{http_code}\\\\n')",
+      "Bash(python3 -c \"import sys,json;print\\(len\\(json.load\\(sys.stdin\\)\\),'saved'\\)\")",
+      "Bash(.venv/bin/python -c ' *)",
+      "Bash(./run.sh)",
+      "Bash(curl -s http://127.0.0.1:8010/api/quotations)",
+      "Bash(python3 -c \"import sys,json;d=json.load\\(sys.stdin\\);print\\([\\(q['id'],q['number']\\) for q in d]\\)\")",
+      "Bash(curl -s http://127.0.0.1:8000/css/styles.css)",
+      "Bash(curl -s -I http://127.0.0.1:8000/css/styles.css)",
+      "Bash(.venv/bin/python /tmp/claude-1000/-home-shareef-Documents-quotation-app/0289ec9b-3dae-4880-a001-950664cdaba6/scratchpad/mkpng.py)",
+      "Bash(curl -s http://127.0.0.1:8010/js/quotation.js)",
+      "Bash(python3 -c \"import sys,json;d=json.load\\(sys.stdin\\);print\\([\\(c['id'],c['name'],bool\\(c['default_terms']\\)\\) for c in d]\\)\")"
+    ]
+  }
+}

@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<style>
+  @page {
+    size: A4;
+    margin: 18mm 15mm 20mm 15mm;
+    @bottom-center {
+      content: "{{ styling.footer_note or '' }}";
+      font-size: 8pt;
+      color: #9aa1ac;
+    }
+    @bottom-right {
+      content: "Page " counter(page) " of " counter(pages);
+      font-size: 8pt;
+      color: #9aa1ac;
+    }
+  }
+  :root { --brand: {{ styling.primary_color or '#2563eb' }}; }
+  * { box-sizing: border-box; }
+  body {
+    font-family: {{ styling.font_family or 'Helvetica, Arial, sans-serif' }};
+    color: #1f2733; font-size: 10pt; margin: 0; line-height: 1.45;
+  }
+  .header { display: flex; justify-content: space-between; align-items: flex-start;
+            border-bottom: 3px solid var(--brand); padding-bottom: 14px; margin-bottom: 22px; }
+  .company-logo { max-height: 64px; max-width: 240px; margin-bottom: 8px; display: block; }
+  .company-name { font-size: 20pt; font-weight: 700; color: var(--brand); margin: 0 0 4px; }
+  .company-meta { color: #5b6472; font-size: 9pt; white-space: pre-line; }
+  .doc-title { text-align: right; }
+  .doc-title h1 { font-size: 22pt; letter-spacing: 2px; margin: 0 0 6px; color: #1f2733; text-transform: uppercase; }
+  .doc-meta { font-size: 9pt; color: #5b6472; }
+  .doc-meta b { color: #1f2733; }
+  .parties { display: flex; gap: 30px; margin-bottom: 20px; }
+  .party { flex: 1; }
+  .party .label { text-transform: uppercase; font-size: 8pt; letter-spacing: 1px;
+                  color: #9aa1ac; margin-bottom: 5px; }
+  .party .name { font-weight: 700; font-size: 11pt; }
+  .party .detail { color: #5b6472; font-size: 9pt; white-space: pre-line; }
+  table.items { width: 100%; border-collapse: collapse; margin-bottom: 18px; }
+  table.items thead th {
+    background: var(--brand); color: #fff; font-size: 8.5pt; text-transform: uppercase;
+    letter-spacing: .5px; padding: 9px 8px; text-align: left; font-weight: 600;
+  }
+  table.items tbody td { padding: 8px; border-bottom: 1px solid #e7eaee; vertical-align: top; }
+  table.items tbody tr:nth-child(even) td { background: #f7f9fc; }
+  .totals { width: 44%; margin-left: auto; }
+  .totals table { width: 100%; border-collapse: collapse; }
+  .totals td { padding: 6px 8px; font-size: 10pt; }
+  .totals td.label { color: #5b6472; text-align: right; }
+  .totals td.value { text-align: right; font-weight: 600; }
+  .totals tr.grand td { border-top: 2px solid var(--brand); font-size: 12pt;
+                        color: var(--brand); font-weight: 700; padding-top: 10px; }
+  .section { margin-top: 20px; }
+  .section h3 { font-size: 9pt; text-transform: uppercase; letter-spacing: 1px;
+                color: #9aa1ac; margin: 0 0 6px; }
+  .section p { margin: 0; color: #5b6472; font-size: 9pt; white-space: pre-line; }
+  .badge { display: inline-block; padding: 2px 10px; border-radius: 999px; font-size: 8pt;
+           text-transform: uppercase; letter-spacing: .5px; background: #eef2ff; color: var(--brand); }
+</style>
+</head>
+<body>
+  <div class="header">
+    <div class="company">
+      {% if logo %}<img class="company-logo" src="{{ logo }}" alt="">{% endif %}
+      <p class="company-name">{{ company.name or 'Your Company' }}</p>
+      <div class="company-meta">{{ company.address or '' }}{% if company.phone %}
+Tel: {{ company.phone }}{% endif %}{% if company.email %}
+{{ company.email }}{% endif %}{% if company.website %}
+{{ company.website }}{% endif %}{% if company.tax_number %}
+Tax No: {{ company.tax_number }}{% endif %}</div>
+    </div>
+    <div class="doc-title">
+      <h1>{{ styling.doc_title or 'Quotation' }}</h1>
+      <div class="doc-meta">
+        <div><b>No:</b> {{ q.number }}</div>
+        {% if q.quote_date %}<div><b>Date:</b> {{ q.quote_date }}</div>{% endif %}
+        {% if q.valid_until %}<div><b>Valid until:</b> {{ q.valid_until }}</div>{% endif %}
+        <div style="margin-top:6px"><span class="badge">{{ q.status }}</span></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="parties">
+    <div class="party">
+      <div class="label">Prepared for</div>
+      <div class="name">{{ q.customer_name or '—' }}</div>
+      {% if q.customer_company %}<div class="detail">{{ q.customer_company }}</div>{% endif %}
+      <div class="detail">{{ q.customer_address or '' }}{% if q.customer_phone %}
+{{ q.customer_phone }}{% endif %}{% if q.customer_email %}
+{{ q.customer_email }}{% endif %}</div>
+    </div>
+    {% if q.title %}
+    <div class="party">
+      <div class="label">Subject</div>
+      <div class="name">{{ q.title }}</div>
+    </div>
+    {% endif %}
+  </div>
+
+  <table class="items">
+    <thead>
+      <tr>
+        {% for col in columns %}
+        <th style="{% if col.width %}width:{{ col.width }};{% endif %}text-align:{{ col.align or 'left' }}">{{ col.label }}</th>
+        {% endfor %}
+      </tr>
+    </thead>
+    <tbody>
+      {% for row in rows %}
+      <tr>
+        {% for cell in row %}
+        <td style="text-align:{{ columns[loop.index0].align or 'left' }}">{{ cell }}</td>
+        {% endfor %}
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+
+  <div class="totals">
+    <table>
+      <tr><td class="label">Subtotal</td><td class="value">{{ symbol }}{{ '%.2f' | format(q.subtotal) }}</td></tr>
+      {% if q.discount %}<tr><td class="label">Discount ({{ '%g' | format(q.discount) }}%)</td>
+        <td class="value">-{{ symbol }}{{ '%.2f' | format(q.subtotal * q.discount / 100) }}</td></tr>{% endif %}
+      {% if q.tax_rate %}<tr><td class="label">Tax ({{ '%g' | format(q.tax_rate) }}%)</td>
+        <td class="value">{{ symbol }}{{ '%.2f' | format((q.subtotal - q.subtotal * q.discount / 100) * q.tax_rate / 100) }}</td></tr>{% endif %}
+      <tr class="grand"><td class="label">Total</td><td class="value">{{ symbol }}{{ '%.2f' | format(q.total) }}</td></tr>
+    </table>
+  </div>
+
+  {% if q.notes %}<div class="section"><h3>Notes</h3><p>{{ q.notes }}</p></div>{% endif %}
+  {% if q.terms %}<div class="section"><h3>Terms &amp; Conditions</h3><p>{{ q.terms }}</p></div>{% endif %}
+</body>
+</html>

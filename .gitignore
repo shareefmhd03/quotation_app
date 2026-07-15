@@ -1,0 +1,7 @@
+.venv/
+__pycache__/
+*.pyc
+backend/data/
+*.db
+.env
+claude-desktop_*.deb

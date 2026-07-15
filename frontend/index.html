@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Quotation App</title>
+  <link rel="stylesheet" href="/css/styles.css">
+</head>
+<body>
+  <header class="topbar">
+    <button class="hamburger" id="menu-toggle" aria-label="Open menu" aria-expanded="false">☰</button>
+    <div class="topbar-brand"><span class="brand-mark">Q</span><span>Quotation</span></div>
+  </header>
+  <div class="drawer-overlay" id="drawer-overlay"></div>
+
+  <aside class="sidebar" id="sidebar">
+    <div class="brand"><span class="brand-mark">Q</span><span>Quotation</span></div>
+    <nav class="nav">
+      <button class="nav-item active" data-view="quotation">📝 New Quotation</button>
+      <button class="nav-item" data-view="saved">📁 Saved Quotations</button>
+      <button class="nav-item" data-view="products">📦 Products</button>
+      <button class="nav-item" data-view="companies">🏢 Companies</button>
+      <button class="nav-item" data-view="templates">🎨 Templates</button>
+    </nav>
+    <div class="sidebar-foot">SQLite · FastAPI</div>
+  </aside>
+
+  <main class="main">
+    <div id="toast" class="toast"></div>
+
+    <!-- ==================== QUOTATION GENERATOR ==================== -->
+    <section id="view-quotation" class="view active">
+      <header class="view-head">
+        <div>
+          <h1 id="q-heading">New Quotation</h1>
+          <p class="muted" id="q-number-label">Unsaved draft</p>
+        </div>
+        <div class="actions">
+          <button class="btn ghost" id="q-new-btn">＋ New</button>
+          <button class="btn" id="q-save-btn">💾 Save</button>
+          <button class="btn" id="q-preview-btn" disabled>👁 Preview</button>
+          <button class="btn primary" id="q-pdf-btn" disabled>⬇ PDF</button>
+        </div>
+      </header>
+
+      <div class="grid-2">
+        <div class="card">
+          <h3>Customer</h3>
+          <div class="field-grid">
+            <label>Name<input id="c-name" placeholder="Customer name"></label>
+            <label>Company<input id="c-company" placeholder="Company"></label>
+            <label>Email<input id="c-email" type="email" placeholder="email@example.com"></label>
+            <label>Phone<input id="c-phone" placeholder="Phone"></label>
+            <label class="span-2">Address<textarea id="c-address" rows="2" placeholder="Address"></textarea></label>
+          </div>
+        </div>
+        <div class="card">
+          <h3>Quotation details</h3>
+          <div class="field-grid">
+            <label class="span-2">From (Company)
+              <div style="display:flex;gap:8px">
+                <select id="q-company" style="flex:1"></select>
+                <button class="btn sm" id="q-company-manage" type="button" title="Manage companies">Manage</button>
+              </div>
+            </label>
+            <label>Title / Subject<input id="q-title" placeholder="e.g. Office fit-out"></label>
+            <label>Template<select id="q-template"></select></label>
+            <label>Date<input id="q-date" type="date"></label>
+            <label>Valid until<input id="q-valid" type="date"></label>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-head">
+          <h3>Line items</h3>
+          <div class="add-row">
+            <input id="item-search" list="product-list" placeholder="Search or type a product name…" autocomplete="off">
+            <datalist id="product-list"></datalist>
+            <button class="btn primary" id="item-add-btn">＋ Add</button>
+            <button class="btn" id="item-custom-btn" title="Add a blank line to fill in manually">＋ Custom line</button>
+          </div>
+        </div>
+        <div class="table-wrap">
+          <table class="items-table">
+            <thead><tr id="items-head"></tr></thead>
+            <tbody id="items-body"></tbody>
+          </table>
+          <p class="empty" id="items-empty">No items yet. Search a product above or type a new name and press Add.</p>
+        </div>
+      </div>
+
+      <div class="grid-2">
+        <div class="card">
+          <h3>Notes &amp; terms</h3>
+          <label class="block">Notes<textarea id="q-notes" rows="3" placeholder="Notes shown on the quotation"></textarea></label>
+          <label class="block">Terms &amp; conditions<textarea id="q-terms" rows="3" placeholder="Payment terms, delivery, etc."></textarea></label>
+        </div>
+        <div class="card totals-card">
+          <h3>Totals</h3>
+          <div class="totals-line"><span>Subtotal</span><b id="t-subtotal">0.00</b></div>
+          <div class="totals-line"><span>Discount %</span><input id="q-discount" type="number" min="0" step="0.01" value="0"></div>
+          <div class="totals-line"><span>Tax %</span><input id="q-tax" type="number" min="0" step="0.01" value="0"></div>
+          <div class="totals-line grand"><span>Total</span><b id="t-total">0.00</b></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ==================== SAVED QUOTATIONS ==================== -->
+    <section id="view-saved" class="view">
+      <header class="view-head">
+        <h1>Saved Quotations</h1>
+        <div class="actions">
+          <button class="btn ghost" id="saved-clear-btn">Clear filters</button>
+          <button class="btn primary" id="saved-export-btn" disabled>⬇ Export selected (0)</button>
+        </div>
+      </header>
+      <div class="card">
+        <div class="filter-bar">
+          <label>Search<input id="f-q-search" placeholder="Number, title or customer…"></label>
+          <label>From date<input id="f-q-from" type="date"></label>
+          <label>To date<input id="f-q-to" type="date"></label>
+          <label>Status<select id="f-q-status">
+            <option value="">All</option>
+            <option value="draft">Draft</option>
+            <option value="sent">Sent</option>
+            <option value="accepted">Accepted</option>
+            <option value="rejected">Rejected</option>
+          </select></label>
+        </div>
+      </div>
+      <div class="card">
+        <div class="table-wrap">
+          <table class="data-table">
+            <thead><tr>
+              <th style="width:34px"><input type="checkbox" id="saved-select-all" title="Select all"></th>
+              <th>Number</th><th>Title</th><th>Customer</th><th>Total</th><th>Status</th><th>Date</th><th></th>
+            </tr></thead>
+            <tbody id="saved-body"></tbody>
+          </table>
+          <p class="empty" id="saved-empty">No saved quotations yet.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ==================== PRODUCTS ==================== -->
+    <section id="view-products" class="view">
+      <header class="view-head">
+        <h1>Products</h1>
+        <div class="actions">
+          <input id="p-search" class="search" placeholder="Search products…">
+          <button class="btn primary" id="p-new-btn">＋ New product</button>
+        </div>
+      </header>
+      <div class="card">
+        <div class="table-wrap">
+          <table class="data-table">
+            <thead><tr><th>Name</th><th>SKU</th><th>Unit</th><th>Price</th><th>Attributes</th><th></th></tr></thead>
+            <tbody id="products-body"></tbody>
+          </table>
+          <p class="empty" id="products-empty">No products yet.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ==================== COMPANIES ==================== -->
+    <section id="view-companies" class="view">
+      <header class="view-head">
+        <h1>Companies</h1>
+        <button class="btn primary" id="co-new-btn">＋ New company</button>
+      </header>
+      <div class="card">
+        <div class="table-wrap">
+          <table class="data-table">
+            <thead><tr><th>Name</th><th>Email</th><th>Phone</th><th>Default</th><th></th></tr></thead>
+            <tbody id="companies-body"></tbody>
+          </table>
+          <p class="empty" id="companies-empty">No companies yet. Add one so you don't retype details on every quotation.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ==================== TEMPLATES ==================== -->
+    <section id="view-templates" class="view">
+      <header class="view-head">
+        <h1>Templates</h1>
+        <button class="btn primary" id="t-new-btn">＋ New template</button>
+      </header>
+      <div class="card">
+        <div class="table-wrap">
+          <table class="data-table">
+            <thead><tr><th>Name</th><th>Columns</th><th>Default</th><th></th></tr></thead>
+            <tbody id="templates-body"></tbody>
+          </table>
+          <p class="empty" id="templates-empty">No templates yet.</p>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- ==================== MODAL ==================== -->
+  <div id="modal" class="modal-backdrop">
+    <div class="modal">
+      <div class="modal-head"><h2 id="modal-title">Edit</h2><button class="icon-btn" id="modal-close">✕</button></div>
+      <div class="modal-body" id="modal-body"></div>
+      <div class="modal-foot" id="modal-foot"></div>
+    </div>
+  </div>
+
+  <script src="/js/api.js"></script>
+  <script src="/js/ui.js"></script>
+  <script src="/js/products.js"></script>
+  <script src="/js/companies.js"></script>
+  <script src="/js/templates.js"></script>
+  <script src="/js/quotation.js"></script>
+  <script src="/js/app.js"></script>
+</body>
+</html>
