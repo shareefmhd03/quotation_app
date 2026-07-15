@@ -21,7 +21,8 @@ class Company(Base):
     email: Mapped[str | None] = mapped_column(String(255), default=None)
     website: Mapped[str | None] = mapped_column(String(255), default=None)
     tax_number: Mapped[str | None] = mapped_column(String(100), default=None)
-    logo_path: Mapped[str | None] = mapped_column(String(500), default=None)
+    # Holds a base64 data URI (the logo lives in the DB, not on disk).
+    logo_path: Mapped[str | None] = mapped_column(Text, default=None)
     # Default terms & conditions pre-filled into new quotations for this company;
     # each quotation keeps its own editable copy (Quotation.terms).
     default_terms: Mapped[str | None] = mapped_column(Text, default=None)

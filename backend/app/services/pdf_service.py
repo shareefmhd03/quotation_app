@@ -26,9 +26,11 @@ def _logo_data_uri(logo_path: str | None) -> str:
     """
     if not logo_path:
         return ""
-    # logo_path looks like "/uploads/<name>"; map it back to the upload dir.
-    name = Path(logo_path).name
-    file = UPLOAD_DIR / name
+    # Logos are now stored as data URIs in the DB — use them directly.
+    if logo_path.startswith("data:"):
+        return logo_path
+    # Legacy fallback: a "/uploads/<name>" file path.
+    file = UPLOAD_DIR / Path(logo_path).name
     if not file.is_file():
         return ""
     mime = mimetypes.guess_type(str(file))[0] or "image/png"

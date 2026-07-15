@@ -1,20 +1,16 @@
 # Render Blueprint — deploy with: New + → Blueprint, point at this repo.
+# Database: Neon Postgres (external). Create a project at neon.tech, copy its
+# connection string, and paste it as QUOTE_DATABASE_URL in the Render dashboard
+# when prompted (it's marked sync:false so it isn't committed to the repo).
 # https://render.com/docs/blueprint-spec
 services:
   - type: web
     name: quotation-app
     runtime: docker
     dockerfilePath: ./Dockerfile
-    # Persistent disks require a paid instance (Starter+). On the free plan,
-    # remove the `disk:` block below — note the SQLite DB/uploads then reset on
-    # each deploy and the service sleeps when idle.
-    plan: starter
+    plan: free
     healthCheckPath: /
     autoDeploy: true
     envVars:
-      - key: QUOTE_DATA_DIR
-        value: /data
-    disk:
-      name: quotation-data
-      mountPath: /data
-      sizeGB: 1
+      - key: QUOTE_DATABASE_URL
+        sync: false   # set to your Neon connection string in the Render dashboard

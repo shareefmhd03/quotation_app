@@ -6,10 +6,25 @@ from sqlalchemy.orm import DeclarativeBase, Session, sessionmaker
 
 from .config import settings
 
-# check_same_thread only matters for SQLite; harmless to compute conditionally.
-connect_args = {"check_same_thread": False} if settings.database_url.startswith("sqlite") else {}
 
-engine = create_engine(settings.database_url, connect_args=connect_args)
+def _normalize_url(url: str) -> str:
+    """Managed Postgres providers (Render, Neon, Heroku) hand out
+    `postgres://` / `postgresql://` URLs. Map them to the psycopg (v3) dialect
+    so SQLAlchemy uses the installed driver.
+    """
+    if url.startswith("postgres://"):
+        return "postgresql+psycopg://" + url[len("postgres://"):]
+    if url.startswith("postgresql://"):
+        return "postgresql+psycopg://" + url[len("postgresql://"):]
+    return url
+
+
+DATABASE_URL = _normalize_url(settings.database_url)
+
+# check_same_thread only matters for SQLite; harmless to compute conditionally.
+connect_args = {"check_same_thread": False} if DATABASE_URL.startswith("sqlite") else {}
+
+engine = create_engine(DATABASE_URL, connect_args=connect_args, pool_pre_ping=True)
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
 
@@ -36,7 +51,7 @@ def ensure_columns() -> None:
 
     required = {
         "quotations": [("company_id", "INTEGER")],
-        "companies": [("logo_path", "VARCHAR(500)"), ("default_terms", "TEXT")],
+        "companies": [("logo_path", "TEXT"), ("default_terms", "TEXT")],
     }
     inspector = inspect(engine)
     existing_tables = set(inspector.get_table_names())

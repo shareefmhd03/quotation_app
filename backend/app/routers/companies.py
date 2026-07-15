@@ -11,8 +11,9 @@ router = APIRouter(prefix="/api/companies", tags=["companies"])
 
 @router.post("/upload-logo")
 async def upload_logo(file: UploadFile = File(...)):
-    """Store an uploaded company logo and return its public path."""
-    return {"logo_path": await upload_service.save_image(file)}
+    """Return the logo as an inline data URI, stored in the company row so it
+    persists across redeploys without a disk."""
+    return {"logo_path": await upload_service.to_data_uri(file)}
 
 
 @router.get("", response_model=list[CompanyOut])

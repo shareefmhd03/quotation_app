@@ -46,7 +46,9 @@
       "Bash(QUOTE_DATA_DIR=/tmp/claude-1000/-home-shareef-Documents-quotation-app/0289ec9b-3dae-4880-a001-950664cdaba6/scratchpad/renderdata PYTHONPATH=backend .venv/bin/python -c ' *)",
       "Bash(grep -n '\"currency_symbol\": \"\\\\$\"' backend/seed.py)",
       "Bash(grep -rn '\\\\$' frontend/js/templates.js)",
-      "Bash(curl -s http://127.0.0.1:8000/api/quotations/1/pdf -o /tmp/claude-1000/-home-shareef-Documents-quotation-app/0289ec9b-3dae-4880-a001-950664cdaba6/scratchpad/inr.pdf)"
+      "Bash(curl -s http://127.0.0.1:8000/api/quotations/1/pdf -o /tmp/claude-1000/-home-shareef-Documents-quotation-app/0289ec9b-3dae-4880-a001-950664cdaba6/scratchpad/inr.pdf)",
+      "Bash(curl -s -o /dev/null -w \"%{http_code}\\\\n\" http://127.0.0.1:8031/)",
+      "Bash(pg_isready -h 127.0.0.1 -p 5433)"
     ]
   }
 }
