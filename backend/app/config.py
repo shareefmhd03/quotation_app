@@ -3,13 +3,16 @@
 Central place for settings so switching SQLite -> Postgres later is a one-line
 change (or an env var). Keep this small and boring on purpose.
 """
+import os
 from pathlib import Path
 
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 # backend/  (this file lives in backend/app/config.py)
 BASE_DIR = Path(__file__).resolve().parent.parent
-DATA_DIR = BASE_DIR / "data"
+# DATA_DIR holds the SQLite DB + uploaded images. Override with QUOTE_DATA_DIR to
+# point it at a mounted persistent disk in production (e.g. Render's /data).
+DATA_DIR = Path(os.environ.get("QUOTE_DATA_DIR") or (BASE_DIR / "data"))
 UPLOAD_DIR = DATA_DIR / "uploads"
 
 

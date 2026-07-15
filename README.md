@@ -85,6 +85,37 @@ backend/app/
 frontend/      index.html + css/ + js/  (static SPA)
 ```
 
+## Deploying (Render)
+
+This app is a single service (FastAPI serves both the API and the static
+frontend), so it deploys as one Docker web service. WeasyPrint's native libraries
+are installed by the `Dockerfile`, and SQLite + uploaded images live on a mounted
+disk so they survive restarts/redeploys.
+
+> **Not Vercel:** Vercel is serverless with a read-only filesystem and no native
+> system libraries, so WeasyPrint (PDF), SQLite, and file uploads can't run there.
+> A container host like Render runs the app unchanged.
+
+**Steps:**
+1. Commit and push `Dockerfile`, `.dockerignore`, and `render.yaml` to GitHub.
+2. In Render: **New + → Blueprint**, pick this repo. Render reads `render.yaml`,
+   builds the Docker image, mounts a 1 GB disk at `/data`, and sets
+   `QUOTE_DATA_DIR=/data`.
+3. Open the generated `*.onrender.com` URL.
+
+Local Docker parity:
+
+```bash
+docker build -t quotation-app .
+docker run -p 8000:8000 -v quotation_data:/data quotation-app
+```
+
+**Free plan:** persistent disks need a paid instance (Starter+). To try it free,
+delete the `disk:` block and set `plan: free` in `render.yaml` — but the SQLite DB
+and uploads then reset on each deploy, and the service sleeps when idle. For
+durable free-tier data, use Render's managed Postgres and set `QUOTE_DATABASE_URL`
+(see below) instead of the disk.
+
 ## Scaling to Postgres
 
 Set an env var and install the driver — no code change:

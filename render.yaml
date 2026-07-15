@@ -1,0 +1,20 @@
+# Render Blueprint — deploy with: New + → Blueprint, point at this repo.
+# https://render.com/docs/blueprint-spec
+services:
+  - type: web
+    name: quotation-app
+    runtime: docker
+    dockerfilePath: ./Dockerfile
+    # Persistent disks require a paid instance (Starter+). On the free plan,
+    # remove the `disk:` block below — note the SQLite DB/uploads then reset on
+    # each deploy and the service sleeps when idle.
+    plan: starter
+    healthCheckPath: /
+    autoDeploy: true
+    envVars:
+      - key: QUOTE_DATA_DIR
+        value: /data
+    disk:
+      name: quotation-data
+      mountPath: /data
+      sizeGB: 1
