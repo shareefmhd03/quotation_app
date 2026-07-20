@@ -63,8 +63,12 @@ class QuotationItem(Base):
 
     id: Mapped[int] = mapped_column(primary_key=True)
     quotation_id: Mapped[int] = mapped_column(ForeignKey("quotations.id", ondelete="CASCADE"))
-    # Link back to source product for reference only; nullable so ad-hoc lines work.
-    product_id: Mapped[int | None] = mapped_column(ForeignKey("products.id"), default=None)
+    # Link back to source product for reference only; nullable so ad-hoc lines
+    # work. ON DELETE SET NULL lets a product be deleted without blocking on
+    # quotations that reference it — the line keeps its own snapshot below.
+    product_id: Mapped[int | None] = mapped_column(
+        ForeignKey("products.id", ondelete="SET NULL"), default=None
+    )
 
     # Snapshot copies — editable per quotation, decoupled from the product master.
     name: Mapped[str] = mapped_column(String(255))

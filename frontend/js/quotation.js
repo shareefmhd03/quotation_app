@@ -125,7 +125,7 @@ const Quotation = (() => {
     // Only custom (non-catalogue) lines get the "save to catalogue" toggle.
     const toggle = item.product_id == null
       ? `<label title="Also save this line as a product for reuse" style="display:inline-flex;align-items:center;gap:4px;font-size:11px;color:var(--muted);font-weight:600;margin-right:6px">
-           <input type="checkbox" class="save-cat" style="width:auto" ${item.save_to_catalogue ? 'checked' : ''}>catalogue</label>`
+           <input type="checkbox" class="save-cat" style="width:auto" ${item.save_to_catalogue ? 'checked' : ''}>save to products</label>`
       : '';
     act.innerHTML = `${toggle}<button class="icon-btn" title="Remove">✕</button>`;
     const cb = act.querySelector('.save-cat');
@@ -150,7 +150,7 @@ const Quotation = (() => {
     } else {
       // typed new product — created in catalogue on save (unless toggled off)
       items.push({ product_id: null, name, description: '', unit: 'pcs', attributes: {}, quantity: 1, unit_price: 0, save_to_catalogue: true });
-      toast(`"${name}" added as a custom line (uncheck "catalogue" to keep it one-off)`, 'ok');
+      toast(`"${name}" added as a custom line (uncheck "save to products" to keep it one-off)`, 'ok');
     }
     $('#item-search').value = '';
     renderBody();
