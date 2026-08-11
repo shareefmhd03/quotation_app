@@ -8,6 +8,7 @@ const Quotation = (() => {
   let items = [];          // line-item snapshots (editable, decoupled from products)
   let currentId = null;    // id of the loaded/saved quotation (null = new draft)
   let appliedTerms = '';   // the company default-terms last auto-filled (to know when it's safe to replace)
+  let loadedTitle = null;  // title/subject of a loaded quotation (field no longer on the form)
 
   // ---- reference data ----
   async function refreshTemplates() {
@@ -97,11 +98,33 @@ const Quotation = (() => {
         td.className = 'line-total';
         td.dataset.total = '1';
         td.textContent = money(item.quantity * item.unit_price);
-      } else if (c.source === 'field' && (c.key === 'quantity' || c.key === 'unit_price')) {
+      } else if (c.source === 'field' && c.key === 'quantity') {
+        // Whole-number qty with +/- stepper (no decimals).
         td.className = 'num';
-        td.innerHTML = `<input type="number" step="0.01" style="text-align:${align}" value="${item[c.key] ?? 0}">`;
+        const qtyVal = Math.round(item.quantity || 0);
+        td.innerHTML = `
+          <span class="qty-wrap">
+            <button type="button" class="qty-btn" data-d="-1">−</button>
+            <input type="number" step="1" min="0" inputmode="numeric" placeholder="0" value="${qtyVal || ''}">
+            <button type="button" class="qty-btn" data-d="1">＋</button>
+          </span>`;
+        const inp = td.querySelector('input');
+        const setQty = (v) => {
+          item.quantity = Math.max(0, Math.round(v) || 0);
+          inp.value = item.quantity || '';   // empty box instead of a pre-filled 0
+          tr.querySelector('[data-total]').textContent = money(item.quantity * item.unit_price);
+          recompute();
+        };
+        inp.oninput = () => setQty(parseInt(inp.value, 10));
+        td.querySelectorAll('.qty-btn').forEach((b) =>
+          b.onclick = () => setQty(item.quantity + Number(b.dataset.d)));
+      } else if (c.source === 'field' && c.key === 'unit_price') {
+        td.className = 'num';
+        // Show empty instead of a pre-filled 0 the user has to delete.
+        const priceVal = item.unit_price ? item.unit_price : '';
+        td.innerHTML = `<input type="number" step="0.01" min="0" placeholder="0.00" style="text-align:${align}" value="${priceVal}">`;
         td.querySelector('input').oninput = (e) => {
-          item[c.key] = parseFloat(e.target.value) || 0;
+          item.unit_price = parseFloat(e.target.value) || 0;
           tr.querySelector('[data-total]').textContent = money(item.quantity * item.unit_price);
           recompute();
         };
@@ -145,11 +168,11 @@ const Quotation = (() => {
       items.push({
         product_id: match.id, name: match.name, description: match.description || '',
         unit: match.unit || 'pcs', attributes: { ...(match.attributes || {}) },
-        quantity: 1, unit_price: match.price || 0, save_to_catalogue: true,
+        quantity: 0, unit_price: match.price || 0, save_to_catalogue: true,
       });
     } else {
       // typed new product — created in catalogue on save (unless toggled off)
-      items.push({ product_id: null, name, description: '', unit: 'pcs', attributes: {}, quantity: 1, unit_price: 0, save_to_catalogue: true });
+      items.push({ product_id: null, name, description: '', unit: 'pcs', attributes: {}, quantity: 0, unit_price: 0, save_to_catalogue: true });
       toast(`"${name}" added as a custom line (uncheck "save to products" to keep it one-off)`, 'ok');
     }
     $('#item-search').value = '';
@@ -158,7 +181,7 @@ const Quotation = (() => {
 
   // Add a blank custom line to fill in manually (name editable inline).
   function addCustomLine() {
-    items.push({ product_id: null, name: '', description: '', unit: 'pcs', attributes: {}, quantity: 1, unit_price: 0, save_to_catalogue: true });
+    items.push({ product_id: null, name: '', description: '', unit: 'pcs', attributes: {}, quantity: 0, unit_price: 0, save_to_catalogue: true });
     renderBody();
     // focus the new row's first editable input for immediate typing
     const rows = $('#items-body').querySelectorAll('tr');
@@ -169,10 +192,13 @@ const Quotation = (() => {
 
   // ---- totals ----
   function recompute() {
-    const subtotal = items.reduce((s, it) => s + (it.quantity * it.unit_price), 0);
+    // Mirror the backend math exactly (round line totals, subtotal and total to
+    // 2 decimals) so the on-screen amounts always equal the PDF amounts.
+    const r2 = (v) => Math.round(v * 100) / 100;
+    const subtotal = r2(items.reduce((s, it) => s + r2(it.quantity * it.unit_price), 0));
     const discount = parseFloat($('#q-discount').value) || 0;
     const tax = parseFloat($('#q-tax').value) || 0;
-    const total = subtotal * (1 - discount / 100) * (1 + tax / 100);
+    const total = r2(subtotal * (1 - discount / 100) * (1 + tax / 100));
     $('#t-subtotal').textContent = money(subtotal);
     $('#t-total').textContent = money(total);
   }
@@ -180,9 +206,9 @@ const Quotation = (() => {
   // ---- persistence ----
   function collect() {
     return {
-      title: $('#q-title').value.trim() || null,
+      title: loadedTitle, // Subject field removed from the form; preserve any value from older quotations
       customer_name: $('#c-name').value.trim() || null,
-      customer_company: $('#c-company').value.trim() || null,
+      customer_company: null,
       customer_email: $('#c-email').value.trim() || null,
       customer_phone: $('#c-phone').value.trim() || null,
       customer_address: $('#c-address').value.trim() || null,
@@ -194,6 +220,7 @@ const Quotation = (() => {
       terms: $('#q-terms').value.trim() || null,
       discount: parseFloat($('#q-discount').value) || 0,
       tax_rate: parseFloat($('#q-tax').value) || 0,
+      // status intentionally not sent — it's managed from the Saved Quotations page
       items: items.map((it, idx) => ({
         product_id: it.product_id, name: it.name, description: it.description || null,
         unit: it.unit || 'pcs', attributes: it.attributes || {},
@@ -203,31 +230,58 @@ const Quotation = (() => {
     };
   }
 
+  let saving = false; // guards against double-click / double-submit creating duplicates
+
   async function save() {
+    if (saving) return false;
     const data = collect();
-    if (!data.items.length) return toast('Add at least one line item', 'error');
+    if (!data.items.length) { toast('Add at least one line item', 'error'); return false; }
+    saving = true;
+    const btn = $('#q-save-btn');
+    const label = btn.innerHTML; // keep the icon
+    btn.disabled = true;
+    btn.textContent = 'Saving…';
     try {
       const saved = currentId ? await API.updateQuotation(currentId, data) : await API.createQuotation(data);
       loadInto(saved);
       toast(`Saved ${saved.number}`, 'ok');
       await refreshProducts(); // newly-typed items now in the catalogue
       document.dispatchEvent(new Event('quotations-changed'));
-    } catch (err) { toast(err.message, 'error'); }
+      return true;
+    } catch (err) {
+      toast(err.message, 'error');
+      return false;
+    } finally {
+      saving = false;
+      btn.disabled = false;
+      btn.innerHTML = label;
+    }
+  }
+
+  // Preview/PDF always save first, so the document can never show stale
+  // amounts after on-screen edits (the "mobile amount difference" issue).
+  async function openDocument(urlFn) {
+    // Open the tab synchronously (within the tap gesture) so popup blockers
+    // allow it; point it at the URL only after the save succeeds.
+    const win = window.open('about:blank', '_blank');
+    const ok = await save();
+    if (!ok || !currentId) { if (win) win.close(); return; }
+    const suffix = $('#q-showprices').checked ? '' : '?hide_prices=1';
+    const url = urlFn(currentId) + suffix;
+    if (win) win.location = url; else window.open(url, '_blank');
   }
 
   function setSavedState(saved) {
     currentId = saved ? saved.id : null;
     $('#q-heading').textContent = saved ? `Quotation ${saved.number}` : 'New Quotation';
     $('#q-number-label').textContent = saved ? `Saved · ${saved.status}` : 'Unsaved draft';
-    $('#q-preview-btn').disabled = !saved;
-    $('#q-pdf-btn').disabled = !saved;
+    // Preview/PDF stay enabled — they auto-save the draft first.
   }
 
   function loadInto(q) {
     setSavedState(q);
-    $('#q-title').value = q.title || '';
+    loadedTitle = q.title || null;
     $('#c-name').value = q.customer_name || '';
-    $('#c-company').value = q.customer_company || '';
     $('#c-email').value = q.customer_email || '';
     $('#c-phone').value = q.customer_phone || '';
     $('#c-address').value = q.customer_address || '';
@@ -237,8 +291,8 @@ const Quotation = (() => {
     $('#q-terms').value = q.terms || '';
     // Preserve the saved quotation's terms; don't auto-replace on later company changes.
     appliedTerms = '';
-    $('#q-discount').value = q.discount || 0;
-    $('#q-tax').value = q.tax_rate || 0;
+    $('#q-discount').value = q.discount || '';
+    $('#q-tax').value = q.tax_rate || '';
     if (q.template_id) $('#q-template').value = q.template_id;
     $('#q-company').value = q.company_id || '';
     items = (q.items || []).map((it) => ({
@@ -248,13 +302,18 @@ const Quotation = (() => {
       // already-saved ad-hoc lines default to one-off (won't re-create on next save)
       save_to_catalogue: it.product_id == null ? false : true,
     }));
+    hideDuplicateNotice();
     renderGrid();
   }
 
   function reset() {
     items = [];
-    ['q-title', 'c-name', 'c-company', 'c-email', 'c-phone', 'c-address', 'q-valid', 'q-notes', 'q-terms'].forEach((id) => $('#' + id).value = '');
-    $('#q-discount').value = 0; $('#q-tax').value = 0;
+    ['c-name', 'c-email', 'c-phone', 'c-address', 'q-valid', 'q-notes', 'q-terms'].forEach((id) => $('#' + id).value = '');
+    loadedTitle = null;
+    $('#q-discount').value = ''; $('#q-tax').value = '';
+    $('#q-showprices').checked = true;
+    $('#notes-fold').open = false;
+    hideDuplicateNotice();
     $('#q-date').value = new Date().toISOString().slice(0, 10);
     const def = templates.find((t) => t.is_default) || templates[0];
     if (def) $('#q-template').value = def.id;
@@ -265,6 +324,14 @@ const Quotation = (() => {
     setSavedState(null);
     renderGrid();
   }
+
+  // Info banner shown after duplicating (cleared on New / loading another quote).
+  function showDuplicateNotice(originalNumber, copyNumber) {
+    $('#dup-banner-text').textContent =
+      `${copyNumber} is a duplicate of ${originalNumber}. The original is unchanged — edit this copy as needed.`;
+    $('#dup-banner').hidden = false;
+  }
+  const hideDuplicateNotice = () => { $('#dup-banner').hidden = true; };
 
   async function openById(id) {
     const q = await API.getQuotation(id);
@@ -279,12 +346,13 @@ const Quotation = (() => {
     $('#q-template').onchange = renderGrid;
     $('#q-company').onchange = applyCompanyTerms;
     $('#q-company-manage').onclick = () => App.show('companies');
+    $('#dup-banner-close').onclick = hideDuplicateNotice;
     $('#q-discount').oninput = recompute;
     $('#q-tax').oninput = recompute;
     $('#q-save-btn').onclick = save;
     $('#q-new-btn').onclick = () => confirmDialog('New quotation', 'Discard current draft and start a new one?', reset);
-    $('#q-preview-btn').onclick = () => { if (currentId) window.open(API.previewUrl(currentId), '_blank'); };
-    $('#q-pdf-btn').onclick = () => { if (currentId) window.open(API.pdfUrl(currentId), '_blank'); };
+    $('#q-preview-btn').onclick = () => openDocument(API.previewUrl);
+    $('#q-pdf-btn').onclick = () => openDocument(API.pdfUrl);
     document.addEventListener('products-changed', refreshProducts);
     document.addEventListener('templates-changed', refreshTemplates);
     document.addEventListener('companies-changed', refreshCompanies);
@@ -292,5 +360,5 @@ const Quotation = (() => {
     // Initial terms pre-fill happens in refreshCompanies() once companies load.
   }
 
-  return { init, refreshTemplates, refreshProducts, refreshCompanies, reset, openById };
+  return { init, refreshTemplates, refreshProducts, refreshCompanies, reset, openById, showDuplicateNotice };
 })();

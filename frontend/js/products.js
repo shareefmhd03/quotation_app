@@ -45,7 +45,7 @@ const Products = (() => {
         <label class="span-2">Name<input id="f-name" value="${esc(p.name || '')}" placeholder="Product name"></label>
         <label>SKU<input id="f-sku" value="${esc(p.sku || '')}"></label>
         <label>Unit<input id="f-unit" list="unit-list" autocomplete="off" value="${esc(p.unit || 'pcs')}" placeholder="e.g. pcs, cm, m"></label>
-        <label>Price<input id="f-price" type="number" step="0.01" value="${p.price ?? 0}"></label>
+        <label>Price<input id="f-price" type="number" step="0.01" min="0" placeholder="0.00" value="${p.price ? p.price : ''}"></label>
         <label>Image<input id="f-image" type="file" accept="image/*"></label>
         <label class="span-2">Description<textarea id="f-desc" rows="2">${esc(p.description || '')}</textarea></label>
       </div>

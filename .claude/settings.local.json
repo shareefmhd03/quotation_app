@@ -49,7 +49,19 @@
       "Bash(curl -s http://127.0.0.1:8000/api/quotations/1/pdf -o /tmp/claude-1000/-home-shareef-Documents-quotation-app/0289ec9b-3dae-4880-a001-950664cdaba6/scratchpad/inr.pdf)",
       "Bash(curl -s -o /dev/null -w \"%{http_code}\\\\n\" http://127.0.0.1:8031/)",
       "Bash(pg_isready -h 127.0.0.1 -p 5433)",
-      "Bash(curl -s -o /dev/null -w \"server on 8000: %{http_code}\\\\n\" http://127.0.0.1:8000/)"
+      "Bash(curl -s -o /dev/null -w \"server on 8000: %{http_code}\\\\n\" http://127.0.0.1:8000/)",
+      "Bash(curl -s -o /dev/null -w \"8000: %{http_code}\\\\n\" http://127.0.0.1:8000/)",
+      "Bash(curl -s http://127.0.0.1:8000/api/quotations)",
+      "Bash(python3 -c \"import sys,json;[print\\(q['id'],q['number'],q['customer_name']\\) for q in json.load\\(sys.stdin\\)]\")",
+      "Bash(curl -s http://127.0.0.1:8000/api/quotations/1)",
+      "Bash(python3 -c \"import sys,json;d=json.load\\(sys.stdin\\);print\\('q1 items:',[\\(i['name'],i['quantity']\\) for i in d['items']],'| title:',d['title']\\)\")",
+      "Bash(curl -s http://127.0.0.1:8000/api/quotations/4/pdf -o /tmp/claude-1000/-home-shareef-Documents-quotation-app/0289ec9b-3dae-4880-a001-950664cdaba6/scratchpad/new.pdf)",
+      "Bash(curl -s -X PUT http://127.0.0.1:8000/api/quotations/4 -H 'Content-Type: application/json' -d '{ *)",
+      "Bash(curl -s http://127.0.0.1:8000/api/quotations/4/pdf -o /tmp/claude-1000/-home-shareef-Documents-quotation-app/0289ec9b-3dae-4880-a001-950664cdaba6/scratchpad/full.pdf)",
+      "Bash(curl -s http://127.0.0.1:8000/api/quotations/4/pdf?hide_prices=1 -o /tmp/claude-1000/-home-shareef-Documents-quotation-app/0289ec9b-3dae-4880-a001-950664cdaba6/scratchpad/nop.pdf)",
+      "Bash(python3 -)",
+      "Bash(sed -i '0,/\"primary_color\": \"#1E3A5F\"/s//\"primary_color\": \"#2563eb\"/' backend/seed.py)",
+      "Bash(sed -i 's/\"primary_color\": \"#1E3A5F\"/\"primary_color\": \"#0f766e\"/' backend/seed.py)"
     ]
   }
 }

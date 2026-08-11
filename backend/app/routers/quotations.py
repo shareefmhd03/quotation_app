@@ -60,17 +60,17 @@ def delete_quotation(quotation_id: int, db: Session = Depends(get_db)):
 
 
 @router.get("/{quotation_id}/preview", response_class=HTMLResponse)
-def preview_quotation(quotation_id: int, db: Session = Depends(get_db)):
+def preview_quotation(quotation_id: int, hide_prices: bool = False, db: Session = Depends(get_db)):
     quotation = quotation_service.get_quotation(db, quotation_id)
     template = template_service.resolve_template(db, quotation.template_id)
-    return HTMLResponse(pdf_service.render_html(quotation, template))
+    return HTMLResponse(pdf_service.render_html(quotation, template, hide_prices=hide_prices))
 
 
 @router.get("/{quotation_id}/pdf")
-def download_pdf(quotation_id: int, db: Session = Depends(get_db)):
+def download_pdf(quotation_id: int, hide_prices: bool = False, db: Session = Depends(get_db)):
     quotation = quotation_service.get_quotation(db, quotation_id)
     template = template_service.resolve_template(db, quotation.template_id)
-    pdf_bytes = pdf_service.render_pdf(quotation, template)
+    pdf_bytes = pdf_service.render_pdf(quotation, template, hide_prices=hide_prices)
     filename = f"{quotation.number}.pdf"
     return Response(
         content=pdf_bytes,

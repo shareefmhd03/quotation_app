@@ -96,10 +96,9 @@ GST No: {{ company.tax_number }}{% endif %}</div>
         <div class="doc-title">{{ styling.doc_title or 'Quotation' }}</div>
         <table class="meta">
           <tr><td class="mlabel">Quotation No.</td><td class="mval">{{ q.number }}</td></tr>
-          {% if q.quote_date %}<tr><td class="mlabel">Date</td><td class="mval">{{ q.quote_date }}</td></tr>{% endif %}
-          {% if q.valid_until %}<tr><td class="mlabel">Valid Until</td><td class="mval">{{ q.valid_until }}</td></tr>{% endif %}
+          {% if q.quote_date %}<tr><td class="mlabel">Date</td><td class="mval">{{ q.quote_date | ddate }}</td></tr>{% endif %}
+          {% if q.valid_until %}<tr><td class="mlabel">Valid Until</td><td class="mval">{{ q.valid_until | ddate }}</td></tr>{% endif %}
         </table>
-        {% if q.status %}<div class="status">{{ q.status }}</div>{% endif %}
       </td>
     </tr>
   </table>
@@ -112,7 +111,6 @@ GST No: {{ company.tax_number }}{% endif %}</div>
       <td>
         <div class="ptitle">Bill To</div>
         <div class="pname">{{ q.customer_name or '—' }}</div>
-        {% if q.customer_company %}<div class="pdetail">{{ q.customer_company }}</div>{% endif %}
         <div class="pdetail">{{ q.customer_address or '' }}{% if q.customer_phone %}
 {{ q.customer_phone }}{% endif %}{% if q.customer_email %}
 {{ q.customer_email }}{% endif %}</div>

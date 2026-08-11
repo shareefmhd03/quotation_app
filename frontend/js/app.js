@@ -9,11 +9,16 @@ const App = (() => {
     if (toggle) toggle.setAttribute('aria-expanded', String(open));
   }
 
+  const VIEWS = ['quotation', 'saved', 'products', 'companies', 'templates'];
+
   function show(view) {
+    if (!VIEWS.includes(view)) view = 'quotation';
     $$('.nav-item').forEach((b) => b.classList.toggle('active', b.dataset.view === view));
     $$('.view').forEach((v) => v.classList.toggle('active', v.id === `view-${view}`));
     setDrawer(false); // close the mobile drawer after navigating
     window.scrollTo(0, 0);
+    // Keep the URL in sync so a refresh reopens the same page.
+    if (location.hash !== `#${view}`) history.replaceState(null, '', `#${view}`);
     if (view === 'products') Products.load($('#p-search').value);
     if (view === 'companies') Companies.load();
     if (view === 'templates') Templates.load();
@@ -31,10 +36,12 @@ const App = (() => {
     status: $('#f-q-status').value,
   });
 
+  const DL_ICON = '<svg viewBox="0 0 24 24" style="width:15px;height:15px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="M7 10l5 5 5-5M12 15V3"/></svg>';
+
   function updateExportButton() {
     const n = savedSelected.size;
     const btn = $('#saved-export-btn');
-    btn.textContent = `⬇ Export selected (${n})`;
+    btn.innerHTML = `${DL_ICON}Export selected (${n})`;
     btn.disabled = n === 0;
     // "select all" reflects whether every visible row is selected
     const all = $('#saved-select-all');
@@ -55,11 +62,17 @@ const App = (() => {
         <td>${esc(q.title || '—')}</td>
         <td>${esc(q.customer_name || '—')}</td>
         <td>${money(q.total)}</td>
-        <td><span class="badge ${esc(q.status)}">${esc(q.status)}</span></td>
-        <td>${esc(q.quote_date || '')}</td>
+        <td>
+          <select class="status-select ${esc(q.status)}" data-status-id="${q.id}" title="Change status">
+            ${['draft', 'sent', 'accepted', 'rejected'].map((s) =>
+              `<option value="${s}" ${q.status === s ? 'selected' : ''}>${s[0].toUpperCase() + s.slice(1)}</option>`).join('')}
+          </select>
+        </td>
+        <td>${esc(UI.fmtDate(q.quote_date))}</td>
         <td style="text-align:right;white-space:nowrap">
           <button class="btn sm" data-open="${q.id}">Open</button>
           <a class="btn sm" href="${API.pdfUrl(q.id)}" target="_blank">PDF</a>
+          <button class="btn sm" data-dup="${q.id}" title="Copy this quotation into a new one">Duplicate</button>
           <button class="btn sm danger" data-del="${q.id}">Delete</button>
         </td>
       </tr>`).join('');
@@ -68,7 +81,19 @@ const App = (() => {
       cb.checked ? savedSelected.add(id) : savedSelected.delete(id);
       updateExportButton();
     });
+    body.querySelectorAll('[data-status-id]').forEach((sel) => sel.onchange = async () => {
+      const id = Number(sel.dataset.statusId);
+      try {
+        await API.updateQuotation(id, { status: sel.value });
+        sel.className = `status-select ${sel.value}`;
+        toast(`Status updated to ${sel.value}`, 'ok');
+      } catch (err) {
+        toast(err.message, 'error');
+        loadSaved(); // revert the select to the stored value
+      }
+    });
     body.querySelectorAll('[data-open]').forEach((b) => b.onclick = () => Quotation.openById(Number(b.dataset.open)));
+    body.querySelectorAll('[data-dup]').forEach((b) => b.onclick = () => duplicateQuotation(Number(b.dataset.dup), b));
     body.querySelectorAll('[data-del]').forEach((b) => b.onclick = () => {
       confirmDialog('Delete quotation', 'Delete this quotation permanently?', async () => {
         try { await API.deleteQuotation(Number(b.dataset.del)); savedSelected.delete(Number(b.dataset.del)); toast('Deleted', 'ok'); loadSaved(); }
@@ -76,6 +101,46 @@ const App = (() => {
       });
     });
     updateExportButton();
+  }
+
+  // Copy an existing quotation into a brand-new one (new number, draft status,
+  // today's date). The original is never modified.
+  async function duplicateQuotation(id, btn) {
+    if (btn) btn.disabled = true;
+    try {
+      const q = await API.getQuotation(id);
+      const copy = await API.createQuotation({
+        title: q.title,
+        customer_name: q.customer_name,
+        customer_company: q.customer_company,
+        customer_email: q.customer_email,
+        customer_phone: q.customer_phone,
+        customer_address: q.customer_address,
+        template_id: q.template_id,
+        company_id: q.company_id,
+        quote_date: null,            // backend stamps today
+        valid_until: q.valid_until,
+        notes: q.notes,
+        terms: q.terms,
+        discount: q.discount,
+        tax_rate: q.tax_rate,
+        status: 'draft',
+        items: (q.items || []).map((it, idx) => ({
+          product_id: it.product_id, name: it.name, description: it.description,
+          unit: it.unit, attributes: it.attributes || {},
+          quantity: it.quantity, unit_price: it.unit_price, sort_order: idx,
+          save_to_catalogue: false,  // copying must not touch the product catalogue
+        })),
+      });
+      toast(`Duplicated as ${copy.number}`, 'ok');
+      // Open the copy in the editor with a banner naming the original.
+      await Quotation.openById(copy.id);
+      Quotation.showDuplicateNotice(q.number, copy.number);
+    } catch (err) {
+      toast(err.message, 'error');
+    } finally {
+      if (btn) btn.disabled = false;
+    }
   }
 
   function exportSelected() {
@@ -129,7 +194,9 @@ const App = (() => {
       if ($('#view-saved').classList.contains('active')) loadSaved();
     });
 
-    show('quotation');
+    // Restore the view from the URL hash (refresh/bookmark), default to the editor.
+    window.addEventListener('hashchange', () => show(location.hash.slice(1)));
+    show(location.hash.slice(1) || 'quotation');
   }
 
   return { init, show };

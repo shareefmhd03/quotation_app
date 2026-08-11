@@ -19,8 +19,8 @@ from . import product_service
 
 
 def _generate_number(db: Session) -> str:
-    year = date.today().year
-    prefix = f"QT-{year}-"
+    # QT-MMYYYY-0001 (e.g. QT-082026-0001); the sequence restarts each month.
+    prefix = f"QT-{date.today().strftime('%m%Y')}-"
     seq = crud.quotation.max_sequence(db, prefix) + 1
     return f"{prefix}{seq:04d}"
 
@@ -94,12 +94,22 @@ def get_quotation(db: Session, quotation_id: int) -> Quotation:
 
 
 def create_quotation(db: Session, data: QuotationCreate) -> Quotation:
-    fields = data.model_dump(exclude={"items"})
-    quotation = Quotation(number=_generate_number(db), **fields)
-    quotation.quote_date = quotation.quote_date or date.today().isoformat()
-    quotation.items = _build_items(db, data.items)
-    _apply_totals(quotation)
-    return crud.quotation.create(db, quotation)
+    # Retry on quotation-number collision: two near-simultaneous creates (e.g. a
+    # double-clicked Save on a slow connection) can compute the same next number;
+    # the UNIQUE constraint rejects the loser, and we retry with a fresh number.
+    from sqlalchemy.exc import IntegrityError
+
+    for _ in range(3):
+        fields = data.model_dump(exclude={"items"})
+        quotation = Quotation(number=_generate_number(db), **fields)
+        quotation.quote_date = quotation.quote_date or date.today().isoformat()
+        quotation.items = _build_items(db, data.items)
+        _apply_totals(quotation)
+        try:
+            return crud.quotation.create(db, quotation)
+        except IntegrityError:
+            db.rollback()  # products created via get_or_create were already committed
+    raise HTTPException(status_code=409, detail="Could not allocate a quotation number — please retry")
 
 
 def update_quotation(db: Session, quotation_id: int, data: QuotationUpdate) -> Quotation:

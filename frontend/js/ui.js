@@ -8,6 +8,13 @@ const UI = (() => {
   // en-IN gives Indian digit grouping (e.g. ₹1,00,000.00).
   const money = (n) => `${currency}${Number(n || 0).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
 
+  // Display dates as DD-MM-YYYY (stored internally as ISO YYYY-MM-DD).
+  const fmtDate = (iso) => {
+    if (!iso) return '';
+    const m = String(iso).match(/^(\d{4})-(\d{2})-(\d{2})/);
+    return m ? `${m[3]}-${m[2]}-${m[1]}` : String(iso);
+  };
+
   // Escape untrusted text for safe innerHTML interpolation.
   const esc = (s) => String(s ?? '').replace(/[&<>"']/g, (c) =>
     ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
@@ -46,5 +53,5 @@ const UI = (() => {
     ]);
   }
 
-  return { $, $$, money, esc, toast, openModal, closeModal, confirmDialog, setCurrency };
+  return { $, $$, money, esc, fmtDate, toast, openModal, closeModal, confirmDialog, setCurrency };
 })();

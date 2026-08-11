@@ -16,13 +16,27 @@
   <aside class="sidebar" id="sidebar">
     <div class="brand"><span class="brand-mark">Q</span><span>Quotation</span></div>
     <nav class="nav">
-      <button class="nav-item active" data-view="quotation">📝 New Quotation</button>
-      <button class="nav-item" data-view="saved">📁 Saved Quotations</button>
-      <button class="nav-item" data-view="products">📦 Products</button>
-      <button class="nav-item" data-view="companies">🏢 Companies</button>
-      <button class="nav-item" data-view="templates">🎨 Templates</button>
+      <button class="nav-item active" data-view="quotation">
+        <svg viewBox="0 0 24 24"><path d="M14 3H6a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"/><path d="M14 3v6h6"/><path d="M12 12v6M9 15h6"/></svg>
+        New Quotation
+      </button>
+      <button class="nav-item" data-view="saved">
+        <svg viewBox="0 0 24 24"><path d="M3 7a2 2 0 0 1 2-2h4l2 3h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg>
+        Saved Quotations
+      </button>
+      <button class="nav-item" data-view="products">
+        <svg viewBox="0 0 24 24"><path d="M21 8l-9-5-9 5v8l9 5 9-5z"/><path d="M3 8l9 5 9-5M12 13v8"/></svg>
+        Products
+      </button>
+      <button class="nav-item" data-view="companies">
+        <svg viewBox="0 0 24 24"><path d="M4 21V5a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v16"/><path d="M16 9h3a1 1 0 0 1 1 1v11"/><path d="M2 21h20"/><path d="M8 7h2M8 11h2M8 15h2"/></svg>
+        Companies
+      </button>
+      <button class="nav-item" data-view="templates">
+        <svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg>
+        Templates
+      </button>
     </nav>
-    <div class="sidebar-foot">SQLite · FastAPI</div>
   </aside>
 
   <main class="main">
@@ -36,37 +50,49 @@
           <p class="muted" id="q-number-label">Unsaved draft</p>
         </div>
         <div class="actions">
-          <button class="btn ghost" id="q-new-btn">＋ New</button>
-          <button class="btn" id="q-save-btn">💾 Save</button>
-          <button class="btn" id="q-preview-btn" disabled>👁 Preview</button>
-          <button class="btn primary" id="q-pdf-btn" disabled>⬇ PDF</button>
+          <button class="btn success" id="q-new-btn">
+            <svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>New
+          </button>
+          <button class="btn" id="q-save-btn">
+            <svg viewBox="0 0 24 24"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><path d="M17 21v-8H7v8M7 3v5h8"/></svg>Save
+          </button>
+          <button class="btn" id="q-preview-btn">
+            <svg viewBox="0 0 24 24"><path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7-11-7-11-7z"/><circle cx="12" cy="12" r="3"/></svg>Preview
+          </button>
+          <button class="btn primary" id="q-pdf-btn">
+            <svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="M7 10l5 5 5-5M12 15V3"/></svg>Download PDF
+          </button>
         </div>
       </header>
 
+      <div class="banner" id="dup-banner" hidden>
+        <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg>
+        <span id="dup-banner-text"></span>
+        <button class="icon-btn" id="dup-banner-close" title="Dismiss">✕</button>
+      </div>
+
       <div class="grid-2">
         <div class="card">
-          <h3>Customer</h3>
-          <div class="field-grid">
-            <label>Name<input id="c-name" placeholder="Customer name"></label>
-            <label>Company<input id="c-company" placeholder="Company"></label>
-            <label>Email<input id="c-email" type="email" placeholder="email@example.com"></label>
-            <label>Phone<input id="c-phone" placeholder="Phone"></label>
-            <label class="span-2">Address<textarea id="c-address" rows="2" placeholder="Address"></textarea></label>
-          </div>
-        </div>
-        <div class="card">
           <h3>Quotation details</h3>
-          <div class="field-grid">
+          <div class="field-grid" style="margin-top:12px">
             <label class="span-2">From (Company)
               <div style="display:flex;gap:8px">
                 <select id="q-company" style="flex:1"></select>
                 <button class="btn sm" id="q-company-manage" type="button" title="Manage companies">Manage</button>
               </div>
             </label>
-            <label>Title / Subject<input id="q-title" placeholder="e.g. Office fit-out"></label>
-            <label>Template<select id="q-template"></select></label>
+            <label class="span-2">Template<select id="q-template"></select></label>
             <label>Date<input id="q-date" type="date"></label>
             <label>Valid until<input id="q-valid" type="date"></label>
+          </div>
+        </div>
+        <div class="card">
+          <h3>Customer details</h3>
+          <div class="field-grid" style="margin-top:12px">
+            <label class="span-2">Name<input id="c-name" placeholder="Customer name"></label>
+            <label>Email<input id="c-email" type="email" placeholder="email@example.com"></label>
+            <label>Phone<input id="c-phone" placeholder="Phone"></label>
+            <label class="span-2">Address<textarea id="c-address" rows="2" placeholder="Address"></textarea></label>
           </div>
         </div>
       </div>
@@ -77,8 +103,12 @@
           <div class="add-row">
             <input id="item-search" list="product-list" placeholder="Search or type a product name…" autocomplete="off">
             <datalist id="product-list"></datalist>
-            <button class="btn primary" id="item-add-btn">＋ Add</button>
-            <button class="btn" id="item-custom-btn" title="Add a blank line to fill in manually">＋ Custom line</button>
+            <button class="btn primary" id="item-add-btn">
+              <svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>Add
+            </button>
+            <button class="btn" id="item-custom-btn" title="Add a blank line to fill in manually">
+              <svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="3"/><path d="M12 8v8M8 12h8"/></svg>Custom line
+            </button>
           </div>
         </div>
         <div class="table-wrap">
@@ -93,15 +123,22 @@
       <div class="grid-2">
         <div class="card">
           <h3>Notes &amp; terms</h3>
-          <label class="block">Notes<textarea id="q-notes" rows="3" placeholder="Notes shown on the quotation"></textarea></label>
-          <label class="block">Terms &amp; conditions<textarea id="q-terms" rows="3" placeholder="Payment terms, delivery, etc."></textarea></label>
+          <details class="fold" id="notes-fold">
+            <summary>Edit what prints at the bottom of the PDF</summary>
+            <label class="block">Notes<textarea id="q-notes" rows="3" placeholder="Notes shown on the quotation"></textarea></label>
+            <label class="block">Terms &amp; conditions<textarea id="q-terms" rows="4" placeholder="Payment terms, delivery, etc."></textarea></label>
+          </details>
+          <p class="hint" style="margin:8px 0 0">Terms pre-fill automatically from the selected company.</p>
         </div>
         <div class="card totals-card">
           <h3>Totals</h3>
           <div class="totals-line"><span>Subtotal</span><b id="t-subtotal">0.00</b></div>
-          <div class="totals-line"><span>Discount %</span><input id="q-discount" type="number" min="0" step="0.01" value="0"></div>
-          <div class="totals-line"><span>Tax %</span><input id="q-tax" type="number" min="0" step="0.01" value="0"></div>
+          <div class="totals-line"><span>Discount %</span><input id="q-discount" type="number" min="0" step="0.01" placeholder="0"></div>
+          <div class="totals-line"><span>Tax %</span><input id="q-tax" type="number" min="0" step="0.01" placeholder="0"></div>
           <div class="totals-line grand"><span>Total</span><b id="t-total">0.00</b></div>
+          <label class="opt-chk" style="margin-top:12px" title="Untick to hide the Unit Price column in the PDF — line totals and the grand total are still shown">
+            <input type="checkbox" id="q-showprices" checked> Show unit prices in PDF
+          </label>
         </div>
       </div>
     </section>
@@ -109,10 +146,13 @@
     <!-- ==================== SAVED QUOTATIONS ==================== -->
     <section id="view-saved" class="view">
       <header class="view-head">
-        <h1>Saved Quotations</h1>
+        <div>
+          <h1>Saved Quotations</h1>
+          <p class="view-sub">Search, filter, reopen — or select several and export as a ZIP of PDFs.</p>
+        </div>
         <div class="actions">
           <button class="btn ghost" id="saved-clear-btn">Clear filters</button>
-          <button class="btn primary" id="saved-export-btn" disabled>⬇ Export selected (0)</button>
+          <button class="btn primary" id="saved-export-btn" disabled>Export selected (0)</button>
         </div>
       </header>
       <div class="card">
@@ -146,10 +186,13 @@
     <!-- ==================== PRODUCTS ==================== -->
     <section id="view-products" class="view">
       <header class="view-head">
-        <h1>Products</h1>
+        <div>
+          <h1>Products</h1>
+          <p class="view-sub">Your reusable catalogue — prices and specs auto-fill when picked in a quotation.</p>
+        </div>
         <div class="actions">
           <input id="p-search" class="search" placeholder="Search products…">
-          <button class="btn primary" id="p-new-btn">＋ New product</button>
+          <button class="btn primary" id="p-new-btn"><svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>New product</button>
         </div>
       </header>
       <div class="card">
@@ -166,8 +209,11 @@
     <!-- ==================== COMPANIES ==================== -->
     <section id="view-companies" class="view">
       <header class="view-head">
-        <h1>Companies</h1>
-        <button class="btn primary" id="co-new-btn">＋ New company</button>
+        <div>
+          <h1>Companies</h1>
+          <p class="view-sub">Sender details, logo, GST and default terms — shown in the PDF header.</p>
+        </div>
+        <button class="btn primary" id="co-new-btn"><svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>New company</button>
       </header>
       <div class="card">
         <div class="table-wrap">
@@ -183,8 +229,11 @@
     <!-- ==================== TEMPLATES ==================== -->
     <section id="view-templates" class="view">
       <header class="view-head">
-        <h1>Templates</h1>
-        <button class="btn primary" id="t-new-btn">＋ New template</button>
+        <div>
+          <h1>Templates</h1>
+          <p class="view-sub">Control which columns appear in the grid and PDF, plus colours and footer.</p>
+        </div>
+        <button class="btn primary" id="t-new-btn"><svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>New template</button>
       </header>
       <div class="card">
         <div class="table-wrap">

@@ -62,6 +62,16 @@ _env = Environment(
 _env.filters["amount"] = format_amount
 
 
+def format_display_date(value) -> str:
+    """ISO YYYY-MM-DD -> DD-MM-YYYY for display; passthrough otherwise."""
+    s = str(value or "")
+    m = re.match(r"^(\d{4})-(\d{2})-(\d{2})", s)
+    return f"{m.group(3)}-{m.group(2)}-{m.group(1)}" if m else s
+
+
+_env.filters["ddate"] = format_display_date
+
+
 def _default_columns() -> list[dict]:
     return [
         {"key": "sno", "label": "#", "source": "index", "width": "5%", "align": "center"},
@@ -90,8 +100,15 @@ def _cell_value(item: Quotation, column: dict, index: int, symbol: str) -> str:
     return str((item.attributes or {}).get(key, ""))
 
 
-def build_context(quotation: Quotation, template: QuotationTemplate | None) -> dict:
+def build_context(quotation: Quotation, template: QuotationTemplate | None,
+                  hide_prices: bool = False) -> dict:
     columns = (template.columns if template and template.columns else None) or _default_columns()
+    if hide_prices:
+        # Hide only the unit-price column; line totals and the totals box stay.
+        columns = [
+            c for c in columns
+            if not (c.get("source") == "field" and c.get("key") == "unit_price")
+        ]
     styling = (template.styling if template else {}) or {}
     symbol = styling.get("currency_symbol", settings.currency_symbol)
 
@@ -124,18 +141,21 @@ def build_context(quotation: Quotation, template: QuotationTemplate | None) -> d
         "symbol": symbol,
         "company": company,
         "logo": logo,
+        "hide_prices": hide_prices,
     }
 
 
-def render_html(quotation: Quotation, template: QuotationTemplate | None) -> str:
-    context = build_context(quotation, template)
+def render_html(quotation: Quotation, template: QuotationTemplate | None,
+                hide_prices: bool = False) -> str:
+    context = build_context(quotation, template, hide_prices=hide_prices)
     return _env.get_template("quotation.html").render(**context)
 
 
-def render_pdf(quotation: Quotation, template: QuotationTemplate | None) -> bytes:
+def render_pdf(quotation: Quotation, template: QuotationTemplate | None,
+               hide_prices: bool = False) -> bytes:
     # Imported lazily so the rest of the app can boot even if WeasyPrint's
     # native libs are missing on a given machine.
     from weasyprint import HTML
 
-    html = render_html(quotation, template)
+    html = render_html(quotation, template, hide_prices=hide_prices)
     return HTML(string=html, base_url=str(TEMPLATE_DIR)).write_pdf()
