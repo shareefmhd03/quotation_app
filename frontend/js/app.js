@@ -59,7 +59,6 @@ const App = (() => {
       <tr>
         <td><input type="checkbox" class="row-select" data-id="${q.id}" ${savedSelected.has(q.id) ? 'checked' : ''}></td>
         <td><b>${esc(q.number)}</b></td>
-        <td>${esc(q.title || '—')}</td>
         <td>${esc(q.customer_name || '—')}</td>
         <td>${money(q.total)}</td>
         <td>
